@@ -8,10 +8,33 @@ import {
   SafeAreaView,
 } from "react-native";
 import { Camera, CameraType } from "expo-camera";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 const CameraScreen = () => {
   const [permission, requestPermission] = Camera.useCameraPermissions();
+  const [image, setImage] = useState([]);
+  const cameraRef = useRef(null)
+
+  const takePicture = async () => {
+    if (cameraRef) {
+      try {
+        const data = await cameraRef.current.takePictureAsync();
+        console.log(data);
+        setImage([...image, data.uri]);
+      } catch (error) {
+        console.log(error);
+
+      }
+    }
+  }
+
+  const savePicture = async () => {
+    if (image.length) {
+      try {
+        const asset = await 
+      }
+    }
+  }
 
   if (!permission) {
     requestPermission();
@@ -29,11 +52,13 @@ const CameraScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar />
-      <Camera style={styles.camera} type={CameraType.back}>
-        <TouchableOpacity onPress={clickPhoto}>
-          <Text>Click</Text>
-        </TouchableOpacity>
-      </Camera>
+      <View style={styles.cameraContainer}>
+        <Camera ratio="9:16" style={styles.camera} type={CameraType.back}>
+          <TouchableOpacity onPress={clickPhoto}>
+            <Text>Click</Text>
+          </TouchableOpacity>
+        </Camera>
+      </View>
     </SafeAreaView>
   );
 };
@@ -41,6 +66,11 @@ const CameraScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "black",
+    justifyContent: "center",
+  },
+  cameraContainer: {
+    flex: 0.6,
   },
   camera: {
     flex: 1,
