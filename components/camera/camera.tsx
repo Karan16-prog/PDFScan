@@ -12,29 +12,28 @@ import { useState, useRef } from "react";
 
 const CameraScreen = () => {
   const [permission, requestPermission] = Camera.useCameraPermissions();
-  const [image, setImage] = useState([]);
-  const cameraRef = useRef(null)
+  const [image, setImage] = useState<string[]>([]);
+  const [cameraRef, setCameraRef] = useState<Camera | null>(null);
 
   const takePicture = async () => {
     if (cameraRef) {
       try {
-        const data = await cameraRef.current.takePictureAsync();
+        const data = await cameraRef?.takePictureAsync();
         console.log(data);
         setImage([...image, data.uri]);
       } catch (error) {
         console.log(error);
-
       }
     }
-  }
+  };
 
-  const savePicture = async () => {
-    if (image.length) {
-      try {
-        const asset = await 
-      }
-    }
-  }
+  // const savePicture = async () => {
+  //   if (image.length) {
+  //     try {
+  //       const asset = await
+  //     }
+  //   }
+  // }
 
   if (!permission) {
     requestPermission();
@@ -53,7 +52,12 @@ const CameraScreen = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar />
       <View style={styles.cameraContainer}>
-        <Camera ratio="9:16" style={styles.camera} type={CameraType.back}>
+        <Camera
+          ratio="9:16"
+          style={styles.camera}
+          ref={(ref: Camera) => setCameraRef(ref)}
+          type={CameraType.back}
+        >
           <TouchableOpacity onPress={clickPhoto}>
             <Text>Click</Text>
           </TouchableOpacity>
