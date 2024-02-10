@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import * as FileSystem from "expo-file-system";
-import { View, TouchableOpacity, Image, FlatList } from "react-native";
+import { View, TouchableOpacity, Image, FlatList, Text } from "react-native";
+import { NavigationProp } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-const HomeScreen = () => {
+const HomeScreen = ({ navigation }: { navigation: NavigationProp<any> }) => {
   const [file, setFiles] = useState<string[]>([]);
 
   let photoDir = FileSystem.documentDirectory + "photos/";
@@ -38,14 +40,19 @@ const HomeScreen = () => {
   }, []);
 
   return (
-    <div>
-      <FlatList
-        data={file}
-        renderItem={() => <RenderPhotoItem />}
-        keyExtractor={(item) => item}
-        style={{ flex: 1 }}
-      />
-    </div>
+    <SafeAreaView>
+      <View>
+        <TouchableOpacity onPress={() => navigation.navigate("CameraScreen")}>
+          <Text>Go To Camera</Text>
+        </TouchableOpacity>
+        <FlatList
+          data={file}
+          renderItem={() => <RenderPhotoItem />}
+          keyExtractor={(item) => item}
+          style={{ flex: 1 }}
+        />
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -58,7 +65,7 @@ const RenderPhotoItem = () => {
   return (
     <View>
       {/* <TouchableOpacity onPress={() => deletePhoto(item)}> */}
-      <Image source={{ uri: "item" }} style={{ width: 100, height: 100 }} />
+      {/* <Image source={{ uri: "item" }} style={{ width: 100, height: 100 }} /> */}
       {/* </TouchableOpacity> */}
       {/* <TouchableOpacity
         onPress={() => exportToMemory(item)}

@@ -9,8 +9,11 @@ import {
 } from "react-native";
 import { Camera, CameraType } from "expo-camera";
 import { useState, useRef } from "react";
+import { NavigationProp } from "@react-navigation/native";
+import { getCurrentDateTimeString } from "../../func";
+import * as FileSystem from "expo-file-system";
 
-const CameraScreen = () => {
+const CameraScreen = ({ navigation }: { navigation: NavigationProp<any> }) => {
   const [permission, requestPermission] = Camera.useCameraPermissions();
   const [image, setImage] = useState<string[]>([]);
   const [cameraRef, setCameraRef] = useState<Camera | null>(null);
@@ -19,12 +22,24 @@ const CameraScreen = () => {
     if (cameraRef) {
       try {
         const data = await cameraRef?.takePictureAsync();
-        console.log(data);
+        //  console.log(data);
         setImage([...image, data.uri]);
       } catch (error) {
         console.log(error);
       }
     }
+  };
+
+  const savePictureToLocalDir = async () => {
+    let dirName = getCurrentDateTimeString();
+    console.log(dirName);
+    let photoDir = FileSystem.documentDirectory + `photos/${dirName}`;
+    await FileSystem.makeDirectoryAsync(photoDir, { intermediates: true });
+    // await FileSystem.makeDirectoryAsync(photoDir, { intermediates: true });
+    // await FileSystem.copyAsync({
+    //   from: photo.uri,
+    //   to: FileSystem.documentDirectory + "photos/photo_" + Date.now() + ".jpg",
+    // });
   };
 
   // const savePicture = async () => {
@@ -44,13 +59,14 @@ const CameraScreen = () => {
     console.log("test", permission, requestPermission);
   }
 
-  function clickPhoto() {
-    console.log("Click Photo");
-  }
+  // function clickPhoto() {
+  //   console.log("Click Photo");
+  // }
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar />
+
       <View style={styles.cameraContainer}>
         <Camera
           ratio="9:16"
@@ -58,8 +74,12 @@ const CameraScreen = () => {
           ref={(ref: Camera) => setCameraRef(ref)}
           type={CameraType.back}
         >
-          <TouchableOpacity onPress={clickPhoto}>
+          <TouchableOpacity onPress={takePicture}>
             <Text>Click</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={savePictureToLocalDir}>
+            <Text>Save</Text>
           </TouchableOpacity>
         </Camera>
       </View>
