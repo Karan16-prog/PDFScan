@@ -12,10 +12,12 @@ import { useState, useRef } from "react";
 import { NavigationProp } from "@react-navigation/native";
 import { getCurrentDateTimeString } from "../../func";
 import * as FileSystem from "expo-file-system";
+import { CameraCapturedPicture } from "expo-camera";
+import CheckMark from "../../assets/svg/check";
 
 const CameraScreen = ({ navigation }: { navigation: NavigationProp<any> }) => {
   const [permission, requestPermission] = Camera.useCameraPermissions();
-  const [image, setImage] = useState<string[]>([]);
+  const [image, setImage] = useState<CameraCapturedPicture[]>([]);
   const [cameraRef, setCameraRef] = useState<Camera | null>(null);
 
   const takePicture = async () => {
@@ -23,7 +25,7 @@ const CameraScreen = ({ navigation }: { navigation: NavigationProp<any> }) => {
       try {
         const data = await cameraRef?.takePictureAsync();
         //  console.log(data);
-        setImage([...image, data.uri]);
+        setImage([...image, data]);
       } catch (error) {
         console.log(error);
       }
@@ -32,23 +34,24 @@ const CameraScreen = ({ navigation }: { navigation: NavigationProp<any> }) => {
 
   const savePictureToLocalDir = async () => {
     let dirName = getCurrentDateTimeString();
-    console.log(dirName);
-    let photoDir = FileSystem.documentDirectory + `photos/${dirName}`;
-    await FileSystem.makeDirectoryAsync(photoDir, { intermediates: true });
-    // await FileSystem.makeDirectoryAsync(photoDir, { intermediates: true });
-    // await FileSystem.copyAsync({
-    //   from: photo.uri,
-    //   to: FileSystem.documentDirectory + "photos/photo_" + Date.now() + ".jpg",
-    // });
-  };
+    let photoDir = FileSystem.documentDirectory + `photos/${dirName}/`;
+    console.log(photoDir);
+    try {
+      await FileSystem.makeDirectoryAsync(photoDir, { intermediates: true });
 
-  // const savePicture = async () => {
-  //   if (image.length) {
-  //     try {
-  //       const asset = await
-  //     }
-  //   }
-  // }
+      for (let i = 0; i < image.length; i++) {
+        let img = image[i];
+        await FileSystem.copyAsync({
+          from: img.uri,
+          to: photoDir + i + ".jpg",
+        });
+      }
+      setImage([]);
+      navigation.navigate("HomeScreen");
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   if (!permission) {
     requestPermission();
@@ -73,15 +76,22 @@ const CameraScreen = ({ navigation }: { navigation: NavigationProp<any> }) => {
           style={styles.camera}
           ref={(ref: Camera) => setCameraRef(ref)}
           type={CameraType.back}
-        >
-          <TouchableOpacity onPress={takePicture}>
-            <Text>Click</Text>
+        ></Camera>
+      </View>
+      <View style={styles.buttonContainer}>
+        <View></View>
+        <TouchableOpacity
+          style={styles.clickBtn}
+          onPress={takePicture}
+        ></TouchableOpacity>
+        {image.length > 0 ? (
+          <TouchableOpacity
+            style={styles.saveBtn}
+            onPress={savePictureToLocalDir}
+          >
+            <CheckMark />
           </TouchableOpacity>
-
-          <TouchableOpacity onPress={savePictureToLocalDir}>
-            <Text>Save</Text>
-          </TouchableOpacity>
-        </Camera>
+        ) : null}
       </View>
     </SafeAreaView>
   );
@@ -90,14 +100,29 @@ const CameraScreen = ({ navigation }: { navigation: NavigationProp<any> }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "black",
+    backgroundColor: "#101820",
     justifyContent: "center",
+  },
+  buttonContainer: {
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 30,
   },
   cameraContainer: {
     flex: 0.6,
   },
   camera: {
     flex: 1,
+  },
+  clickBtn: {
+    height: 50,
+    width: 50,
+    backgroundColor: "#FEE715",
+    borderRadius: 100,
+  },
+  saveBtn: {
+    padding: 5,
+    backgroundColor: "white",
   },
 });
 

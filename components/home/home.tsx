@@ -13,7 +13,11 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp<any> }) => {
     const dirInfo = await FileSystem.getInfoAsync(photoDir);
     if (!dirInfo.exists) {
       console.log("Directory doesnt exist");
-      await FileSystem.makeDirectoryAsync(photoDir, { intermediates: true });
+      try {
+        await FileSystem.makeDirectoryAsync(photoDir, { intermediates: true });
+      } catch (error) {
+        console.log("Could Not Make Directory", error);
+      }
     }
   };
 
@@ -21,7 +25,7 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp<any> }) => {
     try {
       await ensureDirExists();
       const fileList = await FileSystem.readDirectoryAsync(photoDir);
-      console.log(fileList);
+      //  console.log(fileList);
       setFiles(
         fileList.map(
           (fileName) => FileSystem.documentDirectory + "photos/" + fileName
@@ -38,6 +42,10 @@ const HomeScreen = ({ navigation }: { navigation: NavigationProp<any> }) => {
   useEffect(() => {
     loadPhotos();
   }, []);
+
+  useEffect(() => {
+    console.log(file);
+  }, [file]);
 
   return (
     <SafeAreaView>
